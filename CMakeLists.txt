@@ -22,15 +22,15 @@ add_link_options(
 
 
 set(SOURCE_FILES
-  controller.cpp
-  main.cpp
-  model.cpp
-  view.cpp
+  src/controller.cpp
+  src/main.cpp
+  src/model.cpp
+  src/view.cpp
   )
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 
 add_executable(${APP} ${SOURCE_FILES})
-target_include_directories(${APP} PRIVATE ${GTKMM_INCLUDE_DIRS})
+target_include_directories(${APP} PRIVATE ${GTKMM_INCLUDE_DIRS} src/)
 target_link_libraries(${APP} ${GTKMM_LIBRARIES})

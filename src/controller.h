@@ -9,11 +9,12 @@ class Controller
 {
 public:
     Controller(boost::asio::io_context & ctx);
-//    void refreshLocations();
 
 private:
 
     void quitCallback();
+    void connectCallback(std::string const & shortCode);
+    void disconnectCallback();
     
     boost::asio::io_context & _ctx;
     
