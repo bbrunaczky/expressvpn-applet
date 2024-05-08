@@ -1,0 +1,2 @@
+leak:libfontconfig
+leak:/usr/lib/libglib-2.0.so
