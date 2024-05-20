@@ -66,6 +66,12 @@ std::list<Location> const & Model::topLocations()
 }
 
 
+void Model::setCurrentLocation(std::string const & shortCode)
+{
+    _currentLocation = shortCode;
+}
+
+
 std::optional<Location> Model::currentLocation()
 {
     if (_currentLocation)

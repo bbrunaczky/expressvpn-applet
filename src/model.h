@@ -30,19 +30,20 @@ public:
 
     void setStatus(Status status);
     Status status();
-    
+
     void addLocation(Location && location);
     std::list<Location> const & locations();
     
     void addTopLocation(Location && location);
     std::list<Location> const & topLocations();
 
+    void setCurrentLocation(std::string const & shortCode);
     std::optional<Location> currentLocation();
 private:
     
     Status _status;
     std::optional<std::string> _currentLocation;
 
-    std::list<Location> _locations;
     std::list<Location> _topLocations;
+    std::list<Location> _locations;
 };

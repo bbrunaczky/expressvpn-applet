@@ -8,7 +8,8 @@
 View::View(boost::asio::io_context & ctx, Model & model):
     _ctx{ctx},
     _model{model},
-    _app{Gtk::Application::create("org.bb.expressvpnapplet")}
+    _app{Gtk::Application::create("org.bb.expressvpnapplet")},
+    _menu{Gtk::manage(new Gtk::Menu)}
 {
     Glib::signal_idle().connect_once(std::bind(&View::onStartup, this));
 }
@@ -28,6 +29,12 @@ void View::stop()
 }
 
 
+void View::update()
+{
+    updateMenu();
+}
+
+
 void View::onStartup()
 {
     if (_app->is_remote())
@@ -42,21 +49,31 @@ void View::onStartup()
     _icon->signal_activate().connect(std::bind(&View::onIconLeftClick, this));
     _icon->signal_popup_menu().connect(std::bind(&View::onIconRightClick, this, std::placeholders::_1, std::placeholders::_2));
 
+    
+    std::string cssData = ".StatusText {color: #000000; font-weight: bold}";
+    auto css = Gtk::CssProvider::create();
+    if (not css->load_from_data(cssData))
+    {
+        throw std::runtime_error("Failed to load CSS");
+    }
+
+    auto style_context = Gtk::StyleContext::create();
+    auto screen = Gdk::Screen::get_default();
+    style_context->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    
     updateMenu();
 }
 
 
 void View::updateMenu()
 {
-    for (auto item: _menu.get_children())
-    {
-        _menu.remove(*item);
-    }
+    // If I use the same Menu object over time, removing and adding new MenuItems will mess up the things: for some reason the menu gets popped up at the same position as previously.
+    _menu = Gtk::manage(new Gtk::Menu);
 
     updateMenuStatusSection();
     updateMenuConnectToSection();
     updateMenuQuitSection();
-    _menu.show_all();
+    _menu->show_all();
 }
 
 
@@ -64,11 +81,13 @@ void View::updateMenuStatusSection()
 {
     Gtk::SeparatorMenuItem * separator = Gtk::manage(new Gtk::SeparatorMenuItem());
     separator->set_label("Status");
-    _menu.append(*separator);
+    _menu->append(*separator);
 
     Gtk::MenuItem * statusText = Gtk::manage(new Gtk::MenuItem());
-    _menu.append(*statusText);
+    _menu->append(*statusText);
     statusText->set_sensitive(false);
+    statusText->get_style_context()->add_class("StatusText");
+
     
     switch (_model.status())
     {
@@ -89,7 +108,7 @@ void View::updateMenuStatusSection()
             std::string text = std::format("Connected to {}", _model.currentLocation()->text);
             statusText->set_label(text);
             Gtk::MenuItem * disconnectMenuItem{Gtk::manage(new Gtk::MenuItem("Disconnect"))};
-            _menu.append(*disconnectMenuItem);
+            _menu->append(*disconnectMenuItem);
             disconnectMenuItem->signal_activate().connect(std::bind(&View::onDisconnectBtnPressed, this));
         }
         break;
@@ -107,22 +126,16 @@ void View::updateMenuConnectToSection()
     }
 
     Gtk::SeparatorMenuItem * separator = Gtk::manage(new Gtk::SeparatorMenuItem());
-    separator->set_label("Connect to:");
-    _menu.append(*separator);
+    separator->set_label("Connect to...");
+    _menu->append(*separator);
 
     for (auto const & item: _model.topLocations())
     {
         Gtk::MenuItem * button = Gtk::manage(new Gtk::MenuItem(item.text));
         button->signal_activate().connect(std::bind(&View::onConnectBtnPressed, this, item.shortCode));
-        _menu.append(*button);
+        _menu->append(*button);
     }
 
-    if (!_model.topLocations().empty())
-    {
-        Gtk::SeparatorMenuItem * separator = Gtk::manage(new Gtk::SeparatorMenuItem());
-        _menu.append(*separator);
-    }
-    
     struct AlphabetMenu
     {
         char start;
@@ -145,7 +158,7 @@ void View::updateMenuConnectToSection()
 
     for (auto const & item: aMenus)
     {
-        _menu.append(*item.menuItem);
+        _menu->append(*item.menuItem);
         item.menuItem->set_submenu(*item.subMenu);
     }
     
@@ -256,18 +269,17 @@ void View::updateMenuConnectToSection()
     }
 
     // Frequently used
-
     // todo /bb/
 }
 
 
 void View::updateMenuQuitSection()
 {
-    _menu.append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
+    _menu->append(*Gtk::manage(new Gtk::SeparatorMenuItem()));
         
     Gtk::MenuItem * quitBtn = Gtk::manage(new Gtk::MenuItem("Quit"));
     quitBtn->signal_activate().connect(std::bind(&View::onQuitBtnPressed, this));
-    _menu.append(*quitBtn);
+    _menu->append(*quitBtn);
 }
 
 
@@ -279,7 +291,8 @@ void View::onIconLeftClick()
 
 void View::onIconRightClick(guint mouseButton, guint32 activateTime)
 {
-    _menu.popup(mouseButton, activateTime);
+    _menu->popup(mouseButton, activateTime);
+
 }
 
 

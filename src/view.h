@@ -17,6 +17,8 @@ public:
 
     void start();
     void stop();
+
+    void update();
     
 private:
     void onStartup();
@@ -38,6 +40,7 @@ private:
 
     Glib::RefPtr<Gtk::Application> _app;
     Glib::RefPtr<Gtk::StatusIcon> _icon;
-    Gtk::Menu _menu;
+    Gtk::Menu * _menu;
+//    Gtk::Menu _menu;
 
 };
