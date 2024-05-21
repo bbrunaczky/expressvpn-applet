@@ -31,7 +31,8 @@ void View::stop()
 
 void View::update()
 {
-    updateMenu();
+    Glib::signal_idle().connect_once(std::bind(&View::updateMenu, this));
+    // updateMenu();
 }
 
 
@@ -98,11 +99,8 @@ void View::updateMenuStatusSection()
             statusText->set_label("Disconnected");
             break;
         case Status::CONNECTING:
-        {
-            std::string text = std::format("Connecting to {}", _model.currentLocation()->text);
-            statusText->set_label(text);
-        }
-        break;
+            statusText->set_label("Connecting...");
+            break;
         case Status::CONNECTED:
         {
             std::string text = std::format("Connected to {}", _model.currentLocation()->text);

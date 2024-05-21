@@ -1,25 +1,10 @@
 #pragma once
 
+#include <evpn-types.h>
+
 #include <list>
 #include <optional>
 #include <string>
-
-struct Location
-{
-    std::string shortCode;
-    std::string text;
-    std::string country;
-    bool preferred;
-};
-
-enum class Status
-{
-    INITIALIZING,
-    DISCONNECTED,
-    CONNECTING,
-    CONNECTED
-};
-
 
 class Model
 {
@@ -31,14 +16,16 @@ public:
     void setStatus(Status status);
     Status status();
 
-    void addLocation(Location && location);
+    void addLocation(Location const & location);
     std::list<Location> const & locations();
     
-    void addTopLocation(Location && location);
+    void addTopLocation(Location const & location);
     std::list<Location> const & topLocations();
 
     void setCurrentLocation(std::string const & shortCode);
     std::optional<Location> currentLocation();
+
+    std::string getShortCode(std::string const & locationText) const;
 private:
     
     Status _status;

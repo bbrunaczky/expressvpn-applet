@@ -42,9 +42,9 @@ Status Model::status()
 }
 
 
-void Model::addLocation(Location && location)
+void Model::addLocation(Location const & location)
 {
-    _locations.push_back(std::move(location));
+    _locations.push_back(location);
 }
 
 
@@ -54,9 +54,9 @@ std::list<Location> const & Model::locations()
 }
 
 
-void Model::addTopLocation(Location && location)
+void Model::addTopLocation(Location const & location)
 {
-    _topLocations.push_back(std::move(location));
+    _topLocations.push_back(location);
 }
 
 
@@ -99,5 +99,26 @@ std::optional<Location> Model::currentLocation()
         }
     }
     return std::optional<Location>();
+}
+
+
+std::string Model::getShortCode(std::string const & locationText) const
+{
+    std::string shortCode;
+    
+    for (auto const & list: { _topLocations, _locations} )
+    {
+        auto it = std::find_if(list.begin(),
+                               list.end(),
+                               [locationText] (Location const & location)
+                               {
+                                   return location.text == locationText;
+                               });
+        if (list.end() != it)
+        {
+            shortCode = it->shortCode;
+        }
+    }
+    return shortCode;
 }
 

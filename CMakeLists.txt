@@ -23,6 +23,8 @@ add_link_options(
 
 set(SOURCE_FILES
   src/controller.cpp
+  src/evpn-base.cpp
+  src/evpn-process.cpp
   src/main.cpp
   src/model.cpp
   src/process.cpp
