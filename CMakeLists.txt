@@ -11,7 +11,7 @@ add_compile_options(
     -Werror
     -fdiagnostics-color=always)
 
-include_directories(BEFORE ./ ../util)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
 add_compile_options(
@@ -22,6 +22,9 @@ add_link_options(
 
 
 set(SOURCE_FILES
+  src/config.cpp
+  src/config-test.cpp
+  src/config-prod.cpp
   src/controller.cpp
   src/evpn-base.cpp
   src/evpn-process.cpp
@@ -30,6 +33,8 @@ set(SOURCE_FILES
   src/process.cpp
   src/view.cpp
   )
+
+configure_file(src/resource.h.in ${CMAKE_CURRENT_BINARY_DIR}/resource.h)
 
 find_package(Boost 1.4.0 COMPONENTS filesystem REQUIRED)
 

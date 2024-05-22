@@ -2,13 +2,15 @@
 
 #include <boost/asio.hpp>
 
+#include <config.h>
 #include <controller.h>
 #include <process.h>
 
 
 int main(int argc, char **argv)
 {
-    
+    Config::initialize(argc, argv);
+
     boost::asio::io_context ctx;
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> workGuard{boost::asio::make_work_guard(ctx)};
 

@@ -1,0 +1,9 @@
+#pragma once
+
+#include <filesystem>
+
+namespace resource
+{
+    std::filesystem::path installPrefix{"@CMAKE_INSTALL_PREFIX@"};
+    std::filesystem::path shareFolder{installPrefix / "share/expressvpn-applet"};
+}

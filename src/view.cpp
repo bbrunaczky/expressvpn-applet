@@ -1,4 +1,6 @@
+#include <config.h>
 #include <view.h>
+
 #include <iostream>
 #include <format>
 
@@ -32,7 +34,6 @@ void View::stop()
 void View::update()
 {
     Glib::signal_idle().connect_once(std::bind(&View::updateMenu, this));
-    // updateMenu();
 }
 
 
@@ -45,7 +46,9 @@ void View::onStartup()
         return;
     }
 
-    _icon = Gtk::StatusIcon::create("weather-clear-night");
+    // _icon = Gtk::StatusIcon::create("weather-clear-night");
+    std::cout << "Icon: " << Config::instance().icon() << std::endl;
+    _icon = Gtk::StatusIcon::create_from_file(Config::instance().icon());
     _icon->set_tooltip_text("ExpressVPN");
     _icon->signal_activate().connect(std::bind(&View::onIconLeftClick, this));
     _icon->signal_popup_menu().connect(std::bind(&View::onIconRightClick, this, std::placeholders::_1, std::placeholders::_2));
