@@ -1,9 +1,27 @@
+#include <config.h>
 #include <model.h>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
 
 Model::Model()
 {
     reset();
+
+    std::fstream inp(Config::instance().statFile(), std::ios::in);
+    while (inp)
+    {
+        std::string shortCode;
+        uint64_t value{0};
+        inp >> shortCode;
+        if (inp.eof())
+        {
+            break;
+        }
+        inp >> value;
+        _stat[shortCode] = value;
+    }
+    inp.close();
 }
 
 
@@ -12,21 +30,6 @@ void Model::reset()
     _locations.clear();
     _status = Status::INITIALIZING;
     _currentLocation.reset();
-
-    // todo /bb/ tests
-    // _status = Status::CONNECTED;
-    // _currentLocation = "se";
-    
-    // addTopLocation({ .shortCode = "smart", .text = "Smart Location", .preferred = true });
-    // addTopLocation({ .shortCode = "pickforme", .text = "Pick for Me", .preferred = true });
-
-    // addLocation({ .shortCode = "se2", .text = "Sweden - 2", .country = "Sweden (SE)", .preferred = true });
-    // addLocation({ .shortCode = "se", .text = "Sweden", .country = "Sweden (SE)", .preferred = true });
-
-    // addLocation({ .shortCode = "uswd", .text = "USA - Washington DC", .country = "United States (US)", .preferred = true });
-    // addLocation({ .shortCode = "usny", .text = "USA - New York", .country = "United States (US)", .preferred = true });
-    // addLocation({ .shortCode = "ussf", .text = "USA - San Francisco", .country = "United States (US)", .preferred = false });
-    // addLocation({ .shortCode = "hu", .text = "Hungary (HU)", .country = "Hungary", .preferred = false });
 }
 
 
@@ -122,3 +125,43 @@ std::string Model::getShortCode(std::string const & locationText) const
     return shortCode;
 }
 
+
+std::string Model::getText(std::string const & shortCode) const
+{
+    std::string text;
+    
+    for (auto const & list: { _topLocations, _locations} )
+    {
+        auto it = std::find_if(list.begin(),
+                               list.end(),
+                               [shortCode] (Location const & location)
+                               {
+                                   return location.shortCode == shortCode;
+                               });
+        if (list.end() != it)
+        {
+            text = it->text;
+        }
+    }
+    return text;
+}
+
+
+void Model::increaseStat(std::string const & shortCode)
+{
+    ++_stat[shortCode];
+
+    std::fstream out(Config::instance().statFile(), std::ios::out | std::ios::trunc);
+    for (auto const & [key, value]: _stat)
+    {
+        out << key << " " << value << std::endl;
+    }
+    out.close();
+
+}
+
+
+std::map<std::string, uint64_t> const Model::stat() const
+{
+    return _stat;
+}

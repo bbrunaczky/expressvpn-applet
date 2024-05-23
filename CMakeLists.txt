@@ -28,6 +28,7 @@ set(SOURCE_FILES
   src/controller.cpp
   src/evpn-base.cpp
   src/evpn-process.cpp
+  src/icon-pix.cpp
   src/main.cpp
   src/model.cpp
   src/process.cpp

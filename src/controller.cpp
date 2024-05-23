@@ -8,7 +8,6 @@ Controller::Controller(boost::asio::io_context & ctx):
     _view{_ctx, _model},
     _evpn{new EvpnProcess(_ctx, 10)}
 {
-    // todo /bb/ the signals should be transferred to a non-gtk thread
     _view.quitSignal.connect(std::bind(&Controller::quitCallback, this));
     _view.connectSignal.connect(std::bind(&Controller::connectCallback, this, std::placeholders::_1));
     _view.disconnectSignal.connect(std::bind(&Controller::disconnectCallback, this));
@@ -52,7 +51,10 @@ void Controller::connectCallback(std::string const & shortCode)
     {
         _evpn->connect(shortCode, finalize);
     }
+
+    _model.increaseStat(shortCode);
 }
+
 
 
 void Controller::disconnectCallback()
@@ -84,7 +86,6 @@ void Controller::updateLocations(std::list<Location> locations)
             _model.addLocation(l);
         }
     }    
-    _model.setStatus(Status::DISCONNECTED);
     // View-update is not needed here as in init state we don't show anything.
     // Start querying the status
     _evpn->periodicStatusQuery();

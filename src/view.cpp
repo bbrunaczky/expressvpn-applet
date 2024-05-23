@@ -3,15 +3,16 @@
 
 #include <iostream>
 #include <format>
-
-// How to pass a callable to the GLIB loop: Glib::signal_idle().connect_once([this] () { updateMenu(); });
+#include <algorithm>
 
 
 View::View(boost::asio::io_context & ctx, Model & model):
     _ctx{ctx},
     _model{model},
     _app{Gtk::Application::create("org.bb.expressvpnapplet")},
-    _menu{Gtk::manage(new Gtk::Menu)}
+    _iconPix(Config::instance().icon()),
+    _menu{Gtk::manage(new Gtk::Menu)},
+    _animateTimer{_ctx}
 {
     Glib::signal_idle().connect_once(std::bind(&View::onStartup, this));
 }
@@ -46,14 +47,11 @@ void View::onStartup()
         return;
     }
 
-    // _icon = Gtk::StatusIcon::create("weather-clear-night");
-    std::cout << "Icon: " << Config::instance().icon() << std::endl;
-    _icon = Gtk::StatusIcon::create_from_file(Config::instance().icon());
+    _icon = Gtk::StatusIcon::create(_iconPix.grayscale());
     _icon->set_tooltip_text("ExpressVPN");
     _icon->signal_activate().connect(std::bind(&View::onIconLeftClick, this));
     _icon->signal_popup_menu().connect(std::bind(&View::onIconRightClick, this, std::placeholders::_1, std::placeholders::_2));
 
-    
     std::string cssData = ".StatusText {color: #000000; font-weight: bold}";
     auto css = Gtk::CssProvider::create();
     if (not css->load_from_data(cssData))
@@ -66,18 +64,66 @@ void View::onStartup()
     style_context->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     
     updateMenu();
+    animate();
 }
 
 
 void View::updateMenu()
 {
     // If I use the same Menu object over time, removing and adding new MenuItems will mess up the things: for some reason the menu gets popped up at the same position as previously.
+    // I guess it's related to the 'Connected: <location>' text and with the variance of length of location
+    // todo /bb/ try to increase the length of the label.
     _menu = Gtk::manage(new Gtk::Menu);
 
+    updatePix();
     updateMenuStatusSection();
     updateMenuConnectToSection();
+    updateMenuFrequentlyUsedSection();
     updateMenuQuitSection();
     _menu->show_all();
+}
+
+
+void View::updatePix()
+{
+    static Status prevStatus = Status::INITIALIZING;
+    if (_model.status() != prevStatus)
+    {
+        switch (_model.status())
+        {
+            case Status::DISCONNECTED:
+                _animateTimer.cancel();
+                _icon->set(_iconPix.grayscale());
+                break;
+            case Status::CONNECTED:
+                _animateTimer.cancel();
+                _icon->set(_iconPix.active());
+                break;
+            case Status::CONNECTING:
+                animate();
+                break;
+                _icon->set(_iconPix.active());
+                break;
+            default:
+                break;
+        }
+        prevStatus = _model.status();
+    }
+}
+
+
+void View::animate(int degree)
+{
+    _icon->set(_iconPix.working(degree % 360));
+    _animateTimer.expires_from_now(boost::posix_time::milliseconds(ANIMATE_INTERVAL));
+    _animateTimer.async_wait([this, degree] (boost::system::error_code const & ec)
+                             {
+                                 if (boost::asio::error::operation_aborted == ec)
+                                 {
+                                     return;
+                                 }
+                                 Glib::signal_idle().connect_once(std::bind(&View::animate, this, degree + ANIMATE_ROTATE_STEP));
+                             });
 }
 
 
@@ -269,8 +315,47 @@ void View::updateMenuConnectToSection()
         }
     }
 
-    // Frequently used
-    // todo /bb/
+}
+
+
+void View::updateMenuFrequentlyUsedSection()
+{
+    if (0 == _model.stat().size())
+    {
+        return;
+    }
+
+    Gtk::SeparatorMenuItem * separator = Gtk::manage(new Gtk::SeparatorMenuItem());
+    separator->set_label("Frequently used");
+    _menu->append(*separator);
+
+    std::vector<std::pair<std::string, uint64_t>> freqUsed;
+    freqUsed.reserve(_model.stat().size());
+    for (auto const & item: _model.stat())
+    {
+        freqUsed.push_back(item);
+    }
+    std::sort(freqUsed.begin(),
+              freqUsed.end(),
+              [this] (std::pair<std::string, uint64_t> const & lhs, std::pair<std::string, uint64_t> const & rhs)
+              {
+                  if (lhs.second > rhs.second)
+                  {
+                      return true;
+                  }
+                  else if (lhs.second == rhs.second && _model.getText(lhs.first) < _model.getText(rhs.first))
+                  {
+                      return true;
+                  }
+                  return false;
+              });
+    for (auto i=0u; i < std::min(freqUsed.size(), 3ul); ++i)
+    {
+        Gtk::MenuItem * locationMenuItem = Gtk::manage(new Gtk::MenuItem(_model.getText(freqUsed[i].first)));
+        _menu->append(*locationMenuItem);
+        locationMenuItem->signal_activate().connect(std::bind(&View::onConnectBtnPressed, this, freqUsed[i].first));
+    }
+
 }
 
 
