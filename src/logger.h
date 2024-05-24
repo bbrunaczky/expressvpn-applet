@@ -106,5 +106,5 @@ void Logger::log(LogLevel level, Ts &&... ts)
     std::string logLevel = loglevelToText(level);
     std::string text = concat(std::forward<Ts>(ts)...);
     
-    std::cout << std::format("{} {} {} {}", dateTime, _module, logLevel, text) << std::endl;
+    std::osyncstream(std::cout) << std::format("{} {} {} {}", dateTime, _module, logLevel, text) << std::endl;
 }
