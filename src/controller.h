@@ -1,12 +1,13 @@
 #pragma once
 
+#include <logger.h>
 #include <model.h>
 #include <view.h>
 #include <evpn-base.h>
 
 #include <boost/asio.hpp>
 
-class Controller
+class Controller: public Logger
 {
 public:
     Controller(boost::asio::io_context & ctx);

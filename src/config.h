@@ -1,15 +1,17 @@
 #pragma once
 
+#include <logger.h>
 #include <memory>
 #include <filesystem>
 #include <mutex>
 
-class Config
+class Config: public Logger
 {
 public:
     static void initialize(int argc, char **argv);
     static Config & instance();
 
+    Config();
     virtual ~Config();
 
     std::filesystem::path executable();
@@ -19,6 +21,9 @@ public:
     virtual std::filesystem::path statFile() const = 0;
     virtual std::filesystem::path iconFile() const = 0;
 
+protected:
+    void print();
+    
 private:
 
     void readSettings();

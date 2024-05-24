@@ -17,13 +17,15 @@ void Config::initialize(int argc, char ** argv)
                    {
                        if (2 == argc && std::string("--test") == argv[1])
                        {
-                           std::cout << "Test mode" << std::endl;
                            Config::_instance = std::make_unique<TestConfig>();
+                           Logger("config").debug("Config initialized for TEST mode");
                        }
                        else
                        {
                            Config::_instance = std::make_unique<ProdConfig>();
+                           Logger("config").debug("Config initialized for PROD mode");
                        }
+                       _instance->print();
                    });
 }
 
@@ -38,8 +40,23 @@ Config & Config::instance()
 }
 
 
+Config::Config():
+    Logger("config")
+{}
+
+
 Config::~Config()
 {
+}
+
+
+void Config::print()
+{
+    debug("Setting file:", settingsFile());
+    debug("Stat file:", statFile());
+    debug("Icon:", iconFile());
+    debug("ExpressVPN executable:", executable());
+    debug("Frequently used:", frequentlyUsed());
 }
 
 

@@ -7,13 +7,14 @@
 
 EvpnProcess::EvpnProcess(boost::asio::io_context & ctx, uint32_t statusUpdateInterval):
     EvpnBase(ctx, statusUpdateInterval),
+    Logger("evpn-process"),
     _ctx{ctx}
 {}
 
 
 void EvpnProcess::getLocations(std::function<void (std::list<Location>)> callback)
 {
-    auto lambda = [callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
+    auto lambda = [this, callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
                   {
                       if (0 != exitCode)
                       {
@@ -67,8 +68,10 @@ void EvpnProcess::getLocations(std::function<void (std::list<Location>)> callbac
                           }
                           locations.push_back({ .shortCode = shortCode, .text = location, .country = country, .preferred = recommended == "Y" ? true : false });
                       }
+                      debug("Command execution finished");
                       callback(locations);
                   };
+    debug("Running command: expressvpn list all");
     std::shared_ptr<Process> obj = Process::execute(context(), lambda, Config::instance().executable(), "list", "all");
 
 }
@@ -83,7 +86,7 @@ void EvpnProcess::getStatus(std::function<void (Status, std::optional<std::strin
         process->terminate();
     }
 
-    auto parser = [callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
+    auto parser = [this, callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
                   {
                       process.reset();
                       
@@ -91,6 +94,7 @@ void EvpnProcess::getStatus(std::function<void (Status, std::optional<std::strin
                       {
                           throw std::runtime_error("EvpnBase::periodicStatusQuery() failed. expressvpn returned exit code " + std::to_string(exitCode));
                       }
+                      // debug("Command execution finished");
                       for (auto const & line: stdout)
                       {
                           if (std::string::npos != line.find("Not connected"))
@@ -113,6 +117,8 @@ void EvpnProcess::getStatus(std::function<void (Status, std::optional<std::strin
                       }
                   };
         
+    // debug("Running command: expressvpn status");
+
     process = Process::execute(context(), parser, Config::instance().executable(), "status");
 }
 
@@ -124,10 +130,10 @@ void EvpnProcess::connect(std::string const & shortCode, std::function<void ()> 
     auto parser = [this, callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
                   {
                       _connectProcess.reset();
+                      debug("Command execution finished");
 
                       for (auto const & line: stdout)
                       {
-                          // std::cout << line << std::endl;
                           std::string connectedTo{"Connected to"};
                           if (std::size_t pos = line.find(connectedTo); std::string::npos != pos)
                           {
@@ -137,9 +143,9 @@ void EvpnProcess::connect(std::string const & shortCode, std::function<void ()> 
                       }
                   };
         
+    debug("Running command: expressvpn connect", shortCode);
     _connectProcess = Process::execute(context(), parser, Config::instance().executable(), "connect", shortCode);
 }
-
 
 void EvpnProcess::disconnect(std::function<void ()> callback)
 {
@@ -148,9 +154,16 @@ void EvpnProcess::disconnect(std::function<void ()> callback)
     auto parser = [this, callback] (short exitCode, std::list<std::string> stdout, std::list<std::string> stderr)
                   {
                       _connectProcess.reset();
+                      debug("Command execution finished");
+
+                      if (exitCode)
+                      {
+                          throw std::runtime_error("EvpnBase::disconnect() failed. expressvpn returned exit code " + std::to_string(exitCode));
+                      }
                       callback();
                   };
         
+    debug("Running command: expressvpn disconnect");
     _connectProcess = Process::execute(context(), parser, Config::instance().executable(), "disconnect");
     
 }
@@ -161,7 +174,6 @@ void EvpnProcess::cancel()
     if (_connectProcess.get())
     {
         _connectProcess->terminate();
+        _connectProcess.reset();
     }
 }
-
-

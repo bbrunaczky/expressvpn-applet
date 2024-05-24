@@ -13,5 +13,5 @@ std::filesystem::path TestConfig::statFile() const
 
 std::filesystem::path TestConfig::iconFile() const
 {
-    return "../resources/icon/icon.png";
+    return "../icon/icon.png";
 }

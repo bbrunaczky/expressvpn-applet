@@ -4,6 +4,7 @@
 
 
 Controller::Controller(boost::asio::io_context & ctx):
+    Logger("controller"),
     _ctx{ctx},
     _view{_ctx, _model},
     _evpn{new EvpnProcess(_ctx, 10)}
@@ -24,32 +25,41 @@ Controller::Controller(boost::asio::io_context & ctx):
 
 void Controller::quitCallback()
 {
+    debug("Stopping event loop");
     _ctx.stop();
 }
 
 
 void Controller::connectCallback(std::string const & shortCode)
 {
-    _model.setStatus(Status::CONNECTING);
+    info("Connect request arrived. Location:", _model.getText(shortCode), std::format("({})", shortCode));
     _model.setCurrentLocation(shortCode);
-    _view.update();
 
-    auto finalize = [this] ()
-                    {
-                        _model.setStatus(Status::CONNECTED);
-                        _view.update();
-                    };
+    auto connect = [this, shortCode] ()
+                   {
+                       info("Connecting to", _model.getText(shortCode), std::format("({})", shortCode));
+                       _model.setStatus(Status::CONNECTING);
+                       _view.update();
+                       _evpn->connect(shortCode,
+                                      [this, shortCode] ()
+                                      {
+                                          info("Connected to", _model.getText(shortCode), std::format("({})", shortCode));
+                                          _model.setStatus(Status::CONNECTED);
+                                          _view.update();
+                                      });
+                   };
     if (_model.status() != Status::DISCONNECTED)
     {
-        _evpn->cancel();
-        _evpn->disconnect([this, shortCode, finalize] ()
+        info("Not in DISCONNECTED state, disconnect first");
+        _evpn->disconnect([this, shortCode, connect] ()
                           {
-                              _evpn->connect(shortCode, finalize);
+                              info("Disconnected");
+                              connect();
                           });
     }
     else
     {
-        _evpn->connect(shortCode, finalize);
+        connect();
     }
 
     _model.increaseStat(shortCode);
@@ -59,16 +69,21 @@ void Controller::connectCallback(std::string const & shortCode)
 
 void Controller::disconnectCallback()
 {
-    _model.setStatus(Status::DISCONNECTED);
-    _view.update();
+    info("Disconnect request arrived");
 
-    _evpn->disconnect([] () {});
+    _evpn->disconnect([this] ()
+                      {
+                          _model.setStatus(Status::DISCONNECTED);
+                          _view.update();
+                          info("Disconnected");
+                      });
     
 }
 
 
 void Controller::updateLocations(std::list<Location> locations)
 {
+    debug("Updating locations");
     for (auto & l: locations)
     {
         if (l.shortCode == "smart")
@@ -77,12 +92,12 @@ void Controller::updateLocations(std::list<Location> locations)
         }
         if (l.shortCode == "xv" || l.shortCode == "smart")
         {
-            // std::cout << "Adding TOP location: " << l.shortCode << ", " << l.text << ", " << l.preferred << std::endl;
+            debug("Adding TOP location:", std::format("\"{}\" ({}), country: {}, preferred: {}", l.text, l.shortCode, l.country, l.preferred));
             _model.addTopLocation(l);
         }
         else
         {
-            // std::cout << "Adding location: " << l.shortCode << ", " << l.text << ", " << l.preferred << std::endl;
+            debug("Adding location:", std::format("\"{}\" ({}), country: {}, preferred: {}", l.text, l.shortCode, l.country, l.preferred));
             _model.addLocation(l);
         }
     }    
@@ -96,6 +111,7 @@ void Controller::periodicStatusUpdateCallback(Status status, std::optional<std::
 {
     if (_model.status() != status)
     {
+        info("Status changed by an external event:", statusToText(status));
         _model.setStatus(status);
         if (Status::CONNECTED == status)
         {

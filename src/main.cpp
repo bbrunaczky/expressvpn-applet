@@ -4,6 +4,7 @@
 
 #include <config.h>
 #include <controller.h>
+#include <logger.h>
 #include <process.h>
 
 

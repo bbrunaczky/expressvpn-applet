@@ -1,11 +1,12 @@
 #pragma once
 
 #include <evpn-base.h>
+#include <logger.h>
 #include <process.h>
 #include <boost/asio.hpp>
 
 
-class EvpnProcess: public EvpnBase
+class EvpnProcess: public EvpnBase, public Logger
 {
 public:
     EvpnProcess(boost::asio::io_context & ctx, uint32_t statusUpdateInterval = 0);
