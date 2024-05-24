@@ -10,7 +10,7 @@ View::View(boost::asio::io_context & ctx, Model & model):
     _ctx{ctx},
     _model{model},
     _app{Gtk::Application::create("org.bb.expressvpnapplet")},
-    _iconPix(Config::instance().icon()),
+    _iconPix(Config::instance().iconFile()),
     _menu{Gtk::manage(new Gtk::Menu)},
     _animateTimer{_ctx}
 {
@@ -349,7 +349,7 @@ void View::updateMenuFrequentlyUsedSection()
                   }
                   return false;
               });
-    for (auto i=0u; i < std::min(freqUsed.size(), 3ul); ++i)
+    for (auto i=0u; i < std::min(freqUsed.size(), static_cast<uint64_t>(Config::instance().frequentlyUsed())); ++i)
     {
         Gtk::MenuItem * locationMenuItem = Gtk::manage(new Gtk::MenuItem(_model.getText(freqUsed[i].first)));
         _menu->append(*locationMenuItem);

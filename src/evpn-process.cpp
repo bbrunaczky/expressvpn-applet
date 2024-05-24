@@ -1,4 +1,5 @@
 #include <evpn-process.h>
+#include <config.h>
 
 #include <iostream>
 #include <cctype>
@@ -68,7 +69,7 @@ void EvpnProcess::getLocations(std::function<void (std::list<Location>)> callbac
                       }
                       callback(locations);
                   };
-    std::shared_ptr<Process> obj = Process::execute(context(), lambda, "/usr/bin/expressvpn", "list", "all");
+    std::shared_ptr<Process> obj = Process::execute(context(), lambda, Config::instance().executable(), "list", "all");
 
 }
 
@@ -112,7 +113,7 @@ void EvpnProcess::getStatus(std::function<void (Status, std::optional<std::strin
                       }
                   };
         
-    process = Process::execute(context(), parser, "/usr/bin/expressvpn", "status");
+    process = Process::execute(context(), parser, Config::instance().executable(), "status");
 }
 
 
@@ -136,7 +137,7 @@ void EvpnProcess::connect(std::string const & shortCode, std::function<void ()> 
                       }
                   };
         
-    _connectProcess = Process::execute(context(), parser, "/usr/bin/expressvpn", "connect", shortCode);
+    _connectProcess = Process::execute(context(), parser, Config::instance().executable(), "connect", shortCode);
 }
 
 
@@ -150,7 +151,7 @@ void EvpnProcess::disconnect(std::function<void ()> callback)
                       callback();
                   };
         
-    _connectProcess = Process::execute(context(), parser, "/usr/bin/expressvpn", "disconnect");
+    _connectProcess = Process::execute(context(), parser, Config::instance().executable(), "disconnect");
     
 }
 

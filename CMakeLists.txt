@@ -37,11 +37,11 @@ set(SOURCE_FILES
 
 configure_file(src/resource.h.in ${CMAKE_CURRENT_BINARY_DIR}/resource.h)
 
-find_package(Boost 1.4.0 COMPONENTS filesystem REQUIRED)
+find_package(Boost 1.83.0 COMPONENTS filesystem program_options REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 
 add_executable(${APP} ${SOURCE_FILES})
 target_include_directories(${APP} PRIVATE ${Boost_INCLUDE_DIRS} ${GTKMM_INCLUDE_DIRS} src/)
-target_link_libraries(${APP} ${Boost_FILESYSTEM_LIBRARY} ${GTKMM_LIBRARIES})
+target_link_libraries(${APP} ${Boost_LIBRARIES} ${GTKMM_LIBRARIES})

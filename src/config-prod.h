@@ -6,8 +6,9 @@
 class ProdConfig: public Config
 {
 public:
-    std::string statFile() const override;
-    std::string icon() const override;
+    std::filesystem::path settingsFile() const override;
+    std::filesystem::path statFile() const override;
+    std::filesystem::path iconFile() const override;
 
 private:
     std::string getEnvVar(char const * key) const;

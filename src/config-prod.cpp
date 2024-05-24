@@ -3,17 +3,22 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <filesystem>
 #include <string>
 
 
-std::string ProdConfig::statFile() const
+std::filesystem::path ProdConfig::settingsFile() const
+{
+   return configFolder() / "settings";
+}
+
+
+std::filesystem::path ProdConfig::statFile() const
 {
     return configFolder() / "stat";
 }
 
 
-std::string ProdConfig::icon() const
+std::filesystem::path ProdConfig::iconFile() const
 {
     return resource::shareFolder / "icon.png";
 }
