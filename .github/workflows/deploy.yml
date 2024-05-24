@@ -17,10 +17,13 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -yq libboost-dev
       
+    - name: GCC version
+      run: gcc --version
+      
     - name: Configure CMake
       run: mkdir build && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
-      env:
-        CXX:  g++-13
+      # env:
+        # CXX:  g++-13
         
     - name: Build
       run: cmake --build ${{github.workspace}}/build
