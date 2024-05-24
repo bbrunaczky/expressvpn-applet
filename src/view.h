@@ -49,8 +49,8 @@ private:
     
     Gtk::Menu * _menu;
     boost::asio::deadline_timer _animateTimer;
-    constexpr static unsigned int const ANIMATE_INTERVAL{20};
-    constexpr static int const ANIMATE_ROTATE_STEP{-20};
+    constexpr static unsigned int const ANIMATE_INTERVAL{50};
+    constexpr static int const ANIMATE_ROTATE_STEP{-10};
     
 
 };

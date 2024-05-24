@@ -13,7 +13,6 @@ add_compile_options(
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-
 add_compile_options(
     "$<$<CONFIG:DEBUG>:-fsanitize=address>")
 
@@ -46,3 +45,6 @@ pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
 add_executable(${APP} ${SOURCE_FILES})
 target_include_directories(${APP} PRIVATE ${Boost_INCLUDE_DIRS} ${GTKMM_INCLUDE_DIRS} src/)
 target_link_libraries(${APP} ${Boost_LIBRARIES} ${GTKMM_LIBRARIES})
+
+install(TARGETS ${APP} DESTINATION bin)
+install(FILES "icon/icon.png" DESTINATION share/${APP}/)
