@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-24.04 # ubuntu-latest
+    runs-on: ubuntu-24.04 # ubuntu-latest # g++13 removed from ubuntu-latest (https://github.com/actions/runner-images/issues/8555)
 
     steps:
     - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
       run: ls -l /usr/bin
 
     - name: Configure CMake
-      run: mkdir build && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+      run: mkdir build && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/
       # env:
         # CXX:  g++-13
         
