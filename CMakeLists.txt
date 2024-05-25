@@ -37,7 +37,7 @@ set(SOURCE_FILES
 
 configure_file(src/resource.h.in ${CMAKE_CURRENT_BINARY_DIR}/resource.h)
 
-find_package(Boost 1.83.0 COMPONENTS filesystem program_options REQUIRED)
+find_package(Boost 1.74.0 COMPONENTS filesystem program_options REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-3.0)
