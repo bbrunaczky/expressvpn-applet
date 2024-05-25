@@ -20,10 +20,10 @@ jobs:
     - name: GCC version
       run: gcc --version
       
-    - name: list of files
+    - name: list of /usr/
       run: ls -l /usr
 
-- name: Configure CMake
+    - name: Configure CMake
       run: mkdir build && cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
       # env:
         # CXX:  g++-13
