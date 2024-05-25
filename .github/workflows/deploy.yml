@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -yq libboost-dev libboost-filesystem-dev libboost-program-options-dev
+      run: sudo apt-get update && sudo apt-get install -yq libboost-dev libboost-filesystem-dev libboost-program-options-dev libgtkmm-3.0-dev
       
     - name: GCC version
       run: gcc --version
