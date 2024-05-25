@@ -20,7 +20,7 @@ jobs:
     - name: GCC version
       run: gcc --version
       
-    - name: ls -l /usr
+    - name: list of files
       run: ls -l /usr
 
 - name: Configure CMake
