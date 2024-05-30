@@ -17,3 +17,11 @@ cmake . -B build -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 cmake --install build
 ```
+
+## License
+
+GNU GPL-3
+
+## Contribution
+
+Feel free to fork and create pull request.
