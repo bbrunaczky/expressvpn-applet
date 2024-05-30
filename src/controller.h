@@ -7,7 +7,7 @@
 
 #include <boost/asio.hpp>
 
-class Controller: public Logger
+class Controller: private Logger
 {
 public:
     Controller(boost::asio::io_context & ctx);

@@ -148,8 +148,13 @@ void View::updateMenuStatusSection()
             statusText->set_label("Disconnected");
             break;
         case Status::CONNECTING:
+        {
             statusText->set_label("Connecting...");
-            break;
+            Gtk::MenuItem * disconnectMenuItem{Gtk::manage(new Gtk::MenuItem("Cancel"))};
+            _menu->append(*disconnectMenuItem);
+            disconnectMenuItem->signal_activate().connect(std::bind(&View::onDisconnectBtnPressed, this));
+        }
+        break;
         case Status::CONNECTED:
         {
             std::string text = std::format("Connected to {}", _model.currentLocation()->text);

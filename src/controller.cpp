@@ -54,6 +54,7 @@ void Controller::connectCallback(std::string const & shortCode)
         _evpn->disconnect([this, shortCode, connect] ()
                           {
                               info("Disconnected");
+                              _model.setStatus(Status::DISCONNECTED);
                               connect();
                           });
     }
@@ -111,7 +112,12 @@ void Controller::periodicStatusUpdateCallback(Status status, std::optional<std::
 {
     if (_model.status() != status)
     {
-        info("Status changed by an external event:", statusToText(status));
+        if (Status::DISCONNECTED == status && Status::CONNECTING == _model.status())
+        {
+            debug("Ignoring external status change as we are connecting now");
+            return;
+        }
+        info("expressvpn shows new status:", statusToText(status));
         _model.setStatus(status);
         if (Status::CONNECTED == status)
         {

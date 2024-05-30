@@ -6,7 +6,7 @@
 #include <boost/asio.hpp>
 
 
-class EvpnProcess: public EvpnBase, public Logger
+class EvpnProcess: public EvpnBase, private Logger
 {
 public:
     EvpnProcess(boost::asio::io_context & ctx, uint32_t statusUpdateInterval = 0);

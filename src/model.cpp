@@ -4,7 +4,8 @@
 #include <iostream>
 #include <fstream>
 
-Model::Model()
+Model::Model():
+    Logger{"model"}
 {
     reset();
 
@@ -35,7 +36,11 @@ void Model::reset()
 
 void Model::setStatus(Status status)
 {
-    _status = status;
+    if (_status != status)
+    {
+        debug("Status changed:", statusToText(_status), "->", statusToText(status));
+        _status = status;
+    }
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <evpn-types.h>
+#include <logger.h>
 
 #include <list>
 #include <optional>
@@ -8,7 +9,7 @@
 #include <map>
 #include <cstdint>
 
-class Model
+class Model: private Logger
 {
 public:
     Model();
