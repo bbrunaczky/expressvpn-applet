@@ -3,6 +3,7 @@
 #include <evpn-types.h>
 #include <logger.h>
 
+#include <atomic>
 #include <list>
 #include <optional>
 #include <string>
@@ -36,7 +37,7 @@ public:
     std::map<std::string, uint64_t> const stat() const;
 private:
     
-    Status _status;
+    std::atomic<Status> _status;
     std::optional<std::string> _currentLocation;
 
     std::list<Location> _topLocations;

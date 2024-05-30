@@ -36,17 +36,16 @@ void Model::reset()
 
 void Model::setStatus(Status status)
 {
-    if (_status != status)
+    if (_status.exchange(status) != status)
     {
         debug("Status changed:", statusToText(_status), "->", statusToText(status));
-        _status = status;
     }
 }
 
 
 Status Model::status()
 {
-    return _status;
+    return _status.load();
 }
 
 

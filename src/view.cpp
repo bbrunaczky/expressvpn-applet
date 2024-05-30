@@ -87,9 +87,10 @@ void View::updateMenu()
 void View::updatePix()
 {
     static Status prevStatus = Status::INITIALIZING;
-    if (_model.status() != prevStatus)
+    Status const status = _model.status();
+    if (status != prevStatus)
     {
-        switch (_model.status())
+        switch (status)
         {
             case Status::DISCONNECTED:
                 _animateTimer.cancel();
@@ -102,28 +103,32 @@ void View::updatePix()
             case Status::CONNECTING:
                 animate();
                 break;
-                _icon->set(_iconPix.active());
-                break;
             default:
                 break;
         }
-        prevStatus = _model.status();
+        prevStatus = status;
     }
 }
 
 
 void View::animate(int degree)
 {
-    _icon->set(_iconPix.working(degree % 360));
-    _animateTimer.expires_from_now(boost::posix_time::milliseconds(ANIMATE_INTERVAL));
-    _animateTimer.async_wait([this, degree] (boost::system::error_code const & ec)
-                             {
-                                 if (boost::asio::error::operation_aborted == ec)
+    Status status = _model.status();
+    if (Status::CONNECTING == status)
+    {
+        _icon->set(_iconPix.working(degree % 360));
+        _animateTimer.expires_from_now(boost::posix_time::milliseconds(ANIMATE_INTERVAL));
+        // Here, status might have changed to non-CONNECTING by another thread. Not a problem, we wind up the timer anyway, we check the status when it goes off.
+        _animateTimer.async_wait([this, degree] (boost::system::error_code const & ec)
                                  {
-                                     return;
-                                 }
-                                 Glib::signal_idle().connect_once(std::bind(&View::animate, this, degree + ANIMATE_ROTATE_STEP));
-                             });
+                                     // non-gtk thread
+                                     if (boost::asio::error::operation_aborted == ec)
+                                     {
+                                         return;
+                                     }
+                                     Glib::signal_idle().connect_once(std::bind(&View::animate, this, degree + ANIMATE_ROTATE_STEP));
+                                 });
+    }
 }
 
 
