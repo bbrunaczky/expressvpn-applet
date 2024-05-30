@@ -20,7 +20,9 @@ cmake --install build
 
 </td>
 <td>
+
 ![expressvpn-applet.png](screenshot.png "expressvpn-applet.png")
+
 </td>
 </tr>
 </table>
