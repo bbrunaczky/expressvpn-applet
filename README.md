@@ -1,15 +1,15 @@
 # expressvpn-applet
 
-<table>
-<tr>
-<td>
-Unofficial applet for ExpressVPN.
+Unofficial Linux applet for ExpressVPN.
 
-Dependencies:
-- boost
-- gtkmm-3.0
+![expressvpn-applet.png](screenshot.png "expressvpn-applet.png")
 
 ## Compilation
+
+Dependencies:
+
+- boost
+- gtkmm-3.0
 
 ```
 mkdir build
@@ -17,12 +17,3 @@ cmake . -B build -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 cmake --install build
 ```
-
-</td>
-<td>
-
-![expressvpn-applet.png](screenshot.png "expressvpn-applet.png")
-
-</td>
-</tr>
-</table>
